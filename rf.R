@@ -67,4 +67,21 @@ Predicted <- predict(ft_RF, test)
 #output
 test$Survived<-Predicted
 submit<-select(test, PassengerId, Survived)
-write.csv(submit,file="output/submit_60.csv",row.names=FALSE)
+write.csv(submit,file="output/submit_60.csv",row.names=FALSE,quote=FALSE)
+
+## v 7.0 conditional inference trees
+
+#model
+library(party)
+#predict
+set.seed(415)
+fit_CIT <- cforest(as.factor(Survived)~Pclass + Sex + Age + SibSp + Parch+ Fare+ 
+                           Embarked + Title + FamilySize + FamilyID,
+                   data=train,
+                   controls=cforest_unbiased(ntree=2000,mtry=3))
+#outcome
+Predicted_CIT <- predict(fit_CIT,test, OOB = TRUE, type="response")
+
+test$Survived<-Predicted_CIT
+submit<-select(test, PassengerId, Survived)
+write.csv(submit,file="output/submit_70.csv",row.names=FALSE, quote=FALSE)
