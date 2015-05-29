@@ -1,6 +1,9 @@
 #load libraries
 library(dplyr)
-
+library(rpart)
+library(rpart.plot)
+library(RColorBrewer)
+library(rattle)
 #load data
 train <- read.csv("F:/Programowanie/Kaggle_competitions/Titanic-Machine-Learning-from-Disaster_cmpt_0515_tit/downloaded/train.csv")
 test <- read.csv("F:/Programowanie/Kaggle_competitions/Titanic-Machine-Learning-from-Disaster_cmpt_0515_tit/downloaded/test.csv")
@@ -48,7 +51,26 @@ group_by(train,Sex,Pclass,Fare_F) %>% summarise(Survived=sum(Survived),
 test$Survived<-0
 test$Survived[test$Sex=="female"]<-1
 test$Survived[test$Sex=="female" & test$Fare>20 & test$Pclass==3]<-0
+
+
+# first real machine learning algorithm
+# v4.0 decision tree
+fit <-rpart(Survived ~ Pclass+Sex+Age+SibSp+Parch+Fare+Embarked, data=train,
+            method="class")
+rpart.plot(fit, extra = 4, type=2)
+Prediction<-predict(fit43,test,type="class")
+test$Survived<-Prediction
+
+#control complexity of the tree
+fit43 <-rpart(Survived ~ Pclass+Sex+Age+SibSp+Parch+Fare+Embarked, data=train,
+            method="class",control=rpart.control(minsplit=10))
+
+new.fit <- prp(fit42,snip=TRUE)$obj
+fancyRpartPlot(fit43)
+
+##
+
 # save the submit file
 submit<-select(test, PassengerId, Survived)
-write.csv(submit,file="output/submit_30.csv",row.names=FALSE)
+write.csv(submit,file="output/submit_43.csv",row.names=FALSE)
 
