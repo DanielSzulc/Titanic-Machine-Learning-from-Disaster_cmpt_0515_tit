@@ -68,9 +68,54 @@ fit43 <-rpart(Survived ~ Pclass+Sex+Age+SibSp+Parch+Fare+Embarked, data=train,
 new.fit <- prp(fit42,snip=TRUE)$obj
 fancyRpartPlot(fit43)
 
-##
+## feauture engineering
+train$Name[1]
+        # combine two sets (train and test) to make the same operations on feautre 
+        # at the same time
+test$Survived<-NA
+combi<-rbind(train,test)
+
+        # get rid off the factor (as deafult when read in data)
+combi$Name<-as.character(combi$Name)
+combi$Title<-sapply(combi$Name, function(x) {strsplit(x,split="[.,]")[[1]][2]})
+combi$Title<-sub(" ","",combi$Title)
+        # merge rare titles
+combi$Title[combi$Title %in% c("Mlle","Mme")]<-"Mlle"
+combi$Title[combi$Title %in% c("Capt","Col","Major","Sir","Jonkheer","Don")]<-"Sir"
+combi$Title[combi$Title %in% c("Dona","Lady","the Countess")]<-"Lady"
+table(combi$Title)
+combi$Title <-factor(combi$Title)
+combi$FamilySize <- combi$SibSp + combi$Parch + 1
+
+#extract surname
+combi$Surname <- sapply(combi$Name, function(x){strsplit(x,split="[,.]")[[1]][1]})
+combi$FamilyID <- paste(as.character(combi$FamilySize),combi$Surname,sep="")
+combi$FamilyID[combi$FamilySize<=2] <-"Small"
+small_family <- data.frame(table(combi$FamilyID))
+small_family<-small_family[small_family$Freq<=2,]
+combi$FamilyID[combi$FamilyID %in% small_family$Var1]<-"Small"
+combi$FamilyID<-factor(combi$FamilyID)
+
+train <-combi[1:891,]
+test <-combi[892:1309,]
+
+fit <-rpart(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked + 
+                    Title + FamilySize + FamilyID,
+            data = train,
+            method="class")
+fancyRpartPlot(fit)
+Predict <-predict(fit,test,type="class")
+test$Survived<-Predict
+
+fit51 <-rpart(Survived ~ Pclass + Sex + Age + Parch + Fare + Embarked + 
+                    Title + FamilySize,
+            data = train,
+            method="class")
+fancyRpartPlot(fit51)
+Predict <-predict(fit51,test,type="class")
+test$Survived<-Predict
 
 # save the submit file
 submit<-select(test, PassengerId, Survived)
-write.csv(submit,file="output/submit_43.csv",row.names=FALSE)
+write.csv(submit,file="output/submit_51.csv",row.names=FALSE)
 
