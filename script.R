@@ -16,9 +16,17 @@ prop.table(table(train$Survived))
 
 # v1.0 they all perished
 test$Survived <- rep(0,nrow(test))
-submit<-select(test, PassengerId, Survived)
+
+
+# v2.0 based on sex
+prop.table(table(train$Sex, train$Survived))
+prop.table(table(train$Sex, train$Survived),1)
+
+test$Survived[test$Sex=="female"]<-1
 
 
 
 # save the submit file
-write.csv(submit,file="output/submit_10.csv",row.names=FALSE)
+submit<-select(test, PassengerId, Survived)
+write.csv(submit,file="output/submit_20.csv",row.names=FALSE)
+
