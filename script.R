@@ -107,11 +107,10 @@ fancyRpartPlot(fit)
 Predict <-predict(fit,test,type="class")
 test$Survived<-Predict
 
-fit51 <-rpart(Survived ~ Pclass + Sex + Age + Parch + Fare + Embarked + 
-                    Title + FamilySize,
+fit52 <-rpart(Survived ~  Fare + Embarked + Title + FamilySize,
             data = train,
             method="class")
-fancyRpartPlot(fit51)
+fancyRpartPlot(fit52)
 Predict <-predict(fit51,test,type="class")
 test$Survived<-Predict
 
